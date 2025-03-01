@@ -13,6 +13,6 @@ import lombok.NoArgsConstructor;
 public class CurrentUserSession {
     @Id
     private String email;
-    private String userId;
+    private int userId;
     private String sessionId;
 }
