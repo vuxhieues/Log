@@ -4,6 +4,7 @@ import com.example.demo.entities.CurrentUserSession;
 import com.example.demo.entities.Login;
 import com.example.demo.entities.User;
 import com.example.demo.exceptions.CurrentUserException;
+import com.example.demo.exceptions.UserException;
 import com.example.demo.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,7 +18,7 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/add")
-    public ResponseEntity<User> addUser(@RequestBody User user) {
+    public ResponseEntity<User> addUser(@RequestBody User user) throws UserException {
         User user1 = userService.addUser(user);
         return new ResponseEntity<User>(user1, HttpStatus.CREATED);
     }
@@ -28,9 +29,9 @@ public class UserController {
         return new ResponseEntity<User>(user1, HttpStatus.OK);
     }
 
-    @DeleteMapping("/delete/{SessionId}")
-    public  ResponseEntity<String> deleteUser(@PathVariable("SessionId") String id) throws CurrentUserException {
-        String s = userService.deleteUser(id);
+    @DeleteMapping("/delete/{SessionId}/{userId}")
+    public  ResponseEntity<String> deleteUser(@PathVariable("SessionId") String id, @PathVariable("userId") Integer userId) throws CurrentUserException, UserException {
+        String s = userService.deleteUser(id, userId);
         return new ResponseEntity<String>(s, HttpStatus.OK);
     }
 

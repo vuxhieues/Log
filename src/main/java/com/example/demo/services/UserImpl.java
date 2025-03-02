@@ -4,6 +4,7 @@ import com.example.demo.entities.CurrentUserSession;
 import com.example.demo.entities.Login;
 import com.example.demo.entities.User;
 import com.example.demo.exceptions.CurrentUserException;
+import com.example.demo.exceptions.UserException;
 import com.example.demo.repositories.SessionRepo;
 import com.example.demo.repositories.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,19 +22,29 @@ public class UserImpl implements UserService{
     private SessionRepo sessionRepo;
 
     @Override
-    public User addUser(User user) {
-        User user1 = userRepo.save(user);
-        return user1;
+    public User addUser(User user) throws UserException {
+        if(user.getRole().equals("ADMIN") || user.getRole().equals("USER")){
+            User user1 = userRepo.save(user);
+            return user1;
+        }
+        else{
+            throw new UserException("Chưa nhập vai trò");
+        }
     }
 
     @Override
     public User updateUser(User user, String id)throws CurrentUserException {
         User user2 = this.findUserBySessionId(id);
         if(user2 != null) {
-            user2.setName(user.getName());
-            user2.setEmail(user.getEmail());
-            user2.setPassword(user.getPassword());
-            return userRepo.save(user2);
+            if(user.getRole().equals("ADMIN") || user.getRole().equals("USER")){
+                user2.setName(user.getName());
+                user2.setEmail(user.getEmail());
+                user2.setPassword(user.getPassword());
+                return userRepo.save(user2);
+            }
+            else{
+                throw new CurrentUserException("Không có quyền thay đổi");
+            }
         }
         else{
             throw new CurrentUserException("Không tồn tại người dùng");
@@ -41,16 +52,30 @@ public class UserImpl implements UserService{
     }
 
     @Override
-    public String deleteUser(String id) throws CurrentUserException{
-        User user1 = this.findUserBySessionId(id);
+    public String deleteUser(String sessionId, Integer userId) throws CurrentUserException, UserException{
+        User user1 = this.findUserBySessionId(sessionId);
         if(user1 != null) {
-            String name = user1.getName();
-            userRepo.delete(user1);
-            this.logOut(id);
-            return "Đã xóa thành công người dùng" + " " + name;
+            if(user1.getRole().equals("ADMIN")){
+                Optional<User> user2 = userRepo.findById(userId);
+                if(user2.isPresent()) {
+                    String name = user2.get().getName();
+                    Optional<CurrentUserSession> session = sessionRepo.findById(user2.get().getEmail());
+                    if(session.isPresent()) {
+                        this.logOut(session.get().getSessionId());
+                    }
+                    userRepo.delete(user2.get());
+                    return "Đã xóa thành công người dùng" + " " + name;
+                }
+                else{
+                    throw new UserException("Người dùng không tồn tại");
+                }
+            }
+            else{
+                throw new UserException("Không có quyền truy cập");
+            }
         }
         else{
-            throw new CurrentUserException("Người dùng không tồn tại");
+            throw new CurrentUserException("Chưa đăng nhập");
         }
     }
 
@@ -75,6 +100,11 @@ public class UserImpl implements UserService{
                 Optional<CurrentUserSession> session = sessionRepo.findById(login.getEmail());
                 if(session.isEmpty()){
                     String key = random();
+                    Optional<CurrentUserSession> session2 = sessionRepo.findBySessionId(key);
+                    while(session2.isPresent()){
+                        key = random();
+                        session2 = sessionRepo.findBySessionId(key);
+                    }
                     CurrentUserSession currentUserSession = new CurrentUserSession(login.getEmail(), currentUser.getUserId(), key);
                     return sessionRepo.save(currentUserSession);
                 }
