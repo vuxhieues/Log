@@ -99,42 +99,9 @@ Hệ thống quản lý nghỉ phép được thiết kế theo kiến trúc mic
 
 ## Diagram
 
-### High-level Architecture (PlantUML)
 
-```plantuml
-@startuml
-actor "Client UI" as Client
-node "API Gateway\n(Nginx)" as Gateway
-node "employee-service" as Emp
-node "leave-request-service" as LeaveReq
-node "approval-service" as Approval
-node "notification-service" as Notify
-node "manager-service" as Manager
+Xem sơ đồ kiến trúc tại docs/assets/architecture-diagram.png
 
-database "employee-db" as EmpDB
-database "leave-request-db" as LeaveReqDB
-database "approval-db" as ApprovalDB
-database "notification-db" as NotifyDB
-database "manager-db" as ManagerDB
-
-Client --> Gateway
-Gateway --> Emp
-Gateway --> LeaveReq
-Gateway --> Approval
-Gateway --> Notify
-Gateway --> Manager
-
-Emp --> EmpDB
-LeaveReq --> LeaveReqDB
-Approval --> ApprovalDB
-Notify --> NotifyDB
-Manager --> ManagerDB
-
-Approval --> Notify : Gửi thông báo
-LeaveReq --> Approval : Gửi yêu cầu phê duyệt
-Approval --> Emp : Lấy thông tin nhân viên
-@enduml
-```
 
 ---
 
