@@ -102,11 +102,7 @@ Doanh nghiệp cần một hệ thống cho phép nhân viên gửi yêu cầu n
 
 **Sơ đồ tổng quan (ERD rút gọn):**
 ```
-Employee --< LeaveHistory
-Employee --< LeaveRequest
-LeaveRequest --< Approval
-Notification (recipient_id: employee_id hoặc manager_id)
-Manager
+> Xem sơ tại docs/assets/ERD-diagram.png
 ```
 
 ---
@@ -138,20 +134,8 @@ Manager
 
 ## 7. 🎨 Architecture Diagram
 
-```
-+---------------------+
-|      Client UI      |
-+----------+----------+
-           |
-           v
-   +-------+-------+
-   |   API Gateway |
-   |    (Nginx)    |
-   +---+---+---+---+-----------------------------+
-       |   |   |   |                             |
-       v   v   v   v                             v
-employee-service  leave-request-service  approval-service  notification-service  manager-service
-```
+> Xem sơ đồ kiến trúc tại docs/assets/architecture-diagram.png
+
 *Mỗi service có database riêng biệt (PostgreSQL).*
 
 ---
@@ -172,8 +156,4 @@ Thiết kế dữ liệu tách biệt giúp giảm rủi ro khi thay đổi, nâ
 - B21DCCN373 - Vũ Văn Hiếu  
 - B21DCCN638 - Phùng Ngọc Quý  
 
-Template by Hung Dang  
-- Email: hungdn@ptit.edu.vn  
-- GitHub: hungdn1701
 
-Good luck! 💪🚀
