@@ -100,7 +100,7 @@ Hệ thống quản lý nghỉ phép được thiết kế theo kiến trúc mic
 ## Diagram
 
 
-Xem sơ đồ kiến trúc tại docs/assets/architecture-diagram.png
+> Xem sơ đồ kiến trúc tại docs/assets/architecture-diagram.png
 
 
 ---
