@@ -97,7 +97,6 @@ Doanh nghiệp cần một hệ thống cho phép nhân viên gửi yêu cầu n
 ## 5. 🔐 Security Considerations
 
 - **Phân quyền:**  
-  - Mỗi API kiểm tra vai trò (role) của người dùng (EMPLOYEE, MANAGER).
   - Chỉ quản lý mới được phê duyệt/từ chối đơn nghỉ phép.
 - **Xác thực:**  
   - Mỗi service xác thực và kiểm tra dữ liệu đầu vào riêng biệt.
