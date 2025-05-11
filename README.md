@@ -1,6 +1,6 @@
 # 📊 Microservices System - Analysis and Design
 
-Tài liệu này trình bày chi tiết quá trình **phân tích** và **thiết kế** hệ thống quản lý nghỉ phép dựa trên kiến trúc microservices.
+Tài liệu này trình bày chi tiết quá trình phân tích và thiết kế hệ thống quản lý nghỉ phép dựa trên kiến trúc microservices của project.
 
 ---
 
@@ -10,11 +10,11 @@ Tài liệu này trình bày chi tiết quá trình **phân tích** và **thiế
 Doanh nghiệp cần một hệ thống cho phép nhân viên gửi yêu cầu nghỉ phép, quản lý phê duyệt hoặc từ chối các yêu cầu này, đồng thời cập nhật chính xác số ngày nghỉ còn lại và lịch sử nghỉ phép của từng nhân viên. Hệ thống phải đảm bảo tự động hóa quy trình, minh bạch, phân quyền rõ ràng và dễ dàng mở rộng.
 
 **Người dùng:**
-- **Nhân viên:**  
+- **Nhân viên:**
   - Gửi yêu cầu nghỉ phép (chọn loại nghỉ, thời gian, lý do).
   - Xem lịch sử nghỉ phép, số ngày nghỉ còn lại.
   - Nhận thông báo về trạng thái yêu cầu (được duyệt/từ chối).
-- **Quản lý:**  
+- **Quản lý:**
   - Nhận thông báo khi có yêu cầu nghỉ phép mới từ nhân viên.
   - Xem, phê duyệt hoặc từ chối các yêu cầu nghỉ phép.
   - Theo dõi lịch sử phê duyệt và quản lý nhân viên dưới quyền.
@@ -35,14 +35,14 @@ Doanh nghiệp cần một hệ thống cho phép nhân viên gửi yêu cầu n
 
 ## 2. 🧩 Identified Microservices
 
-| Service Name           | Responsibility                                                                 | Tech Stack    |
-|------------------------|-------------------------------------------------------------------------------|---------------|
-| **employee-service**       | Quản lý thông tin nhân viên, lịch sử nghỉ, số ngày nghỉ còn lại                | Python Flask  |
-| **leave-request-service**  | Tiếp nhận, lưu trữ yêu cầu nghỉ phép, xác minh thông tin                       | Python Flask  |
-| **approval-service**       | Xử lý logic phê duyệt/từ chối, cập nhật trạng thái, gửi thông báo              | Python Flask  |
-| **notification-service**   | Gửi thông báo đến nhân viên và quản lý khi có sự kiện liên quan đến nghỉ phép  | Python Flask  |
-| **manager-service**        | Quản lý thông tin quản lý (manager)                                           | Python Flask  |
-| **gateway**                | Định tuyến request đến các microservices, bảo vệ truy cập                      | Nginx         |
+| Service Name           | Responsibility                                              | Tech Stack    |
+|------------------------|------------------------------------------------------------|---------------|
+| employee-service       | Quản lý thông tin nhân viên, lịch sử nghỉ, số ngày nghỉ    | Python Flask  |
+| leave-request-service  | Tiếp nhận, lưu trữ yêu cầu nghỉ phép, xác minh thông tin   | Python Flask  |
+| approval-service       | Xử lý logic phê duyệt/từ chối, cập nhật trạng thái, gửi thông báo | Python Flask  |
+| notification-service   | Gửi thông báo đến nhân viên và quản lý khi có sự kiện liên quan đến nghỉ phép | Python Flask  |
+| manager-service        | Quản lý thông tin quản lý (manager)                        | Python Flask  |
+| gateway                | Định tuyến request đến các microservices, bảo vệ truy cập  | Nginx         |
 
 **Giải thích chi tiết:**
 - **employee-service:** Lưu trữ và quản lý thông tin nhân viên, lịch sử nghỉ phép, số ngày nghỉ còn lại. Cung cấp API để các service khác truy vấn thông tin nhân viên.
@@ -57,14 +57,9 @@ Doanh nghiệp cần một hệ thống cho phép nhân viên gửi yêu cầu n
 ## 3. 🔄 Service Communication
 
 **Cách các service giao tiếp:**
-- **Gateway ⇄ Các service:**  
-  - Giao tiếp qua REST API, sử dụng HTTP.
-  - Gateway định tuyến request dựa trên URL đến đúng service.
-- **Internal service-to-service:**  
-  - Các service gọi trực tiếp REST API của nhau thông qua tên service nội bộ (Docker Compose network).
-  - Ví dụ: approval-service gọi employee-service để xác thực thông tin nhân viên, hoặc gọi notification-service để gửi thông báo.
-- **notification-service:**  
-  - Nhận request từ approval-service hoặc leave-request-service khi có sự kiện cần gửi thông báo.
+- **Gateway ⇄ Các service:** Giao tiếp qua REST API, sử dụng HTTP. Gateway định tuyến request dựa trên URL đến đúng service.
+- **Internal service-to-service:** Các service gọi trực tiếp REST API của nhau thông qua tên service nội bộ (Docker Compose network). Ví dụ: approval-service gọi employee-service để xác thực thông tin nhân viên, hoặc gọi notification-service để gửi thông báo.
+- **notification-service:** Nhận request từ approval-service hoặc leave-request-service khi có sự kiện cần gửi thông báo.
 
 **Lưu ý:**  
 - Không sử dụng message queue ở phiên bản hiện tại, nhưng có thể mở rộng với Redis hoặc RabbitMQ nếu cần xử lý bất đồng bộ hoặc tăng hiệu năng.
@@ -74,26 +69,20 @@ Doanh nghiệp cần một hệ thống cho phép nhân viên gửi yêu cầu n
 ## 4. 🗂️ Data Design
 
 **employee-service**
-- **Employee**
-  - id (PK), name, email, department, position, total_leave_days, used_leave_days, manager_id, created_at, updated_at
-- **LeaveHistory**
-  - id (PK), employee_id, start_date, end_date, leave_type, status, created_at
+- **Employee:** id (PK), name, email, department, position, total_leave_days, used_leave_days, manager_id, created_at, updated_at
+- **LeaveHistory:** id (PK), employee_id, start_date, end_date, leave_type, status, created_at
 
 **leave-request-service**
-- **LeaveRequest**
-  - id (PK), employee_id, start_date, end_date, leave_type, reason, status (PENDING/APPROVED/REJECTED), created_at, updated_at
+- **LeaveRequest:** id (PK), employee_id, start_date, end_date, leave_type, reason, status (PENDING/APPROVED/REJECTED), created_at, updated_at
 
 **approval-service**
-- **Approval**
-  - id (PK), request_id (tham chiếu logic đến LeaveRequest), employee_id, manager_id, status, created_at, updated_at
+- **Approval:** id (PK), request_id (tham chiếu logic đến LeaveRequest), employee_id, manager_id, status, created_at, updated_at
 
 **notification-service**
-- **Notification**
-  - id (PK), recipient_id (employee_id hoặc manager_id), recipient_role, notification_type, message, created_at
+- **Notification:** id (PK), recipient_id (employee_id hoặc manager_id), recipient_role, notification_type, message, created_at
 
 **manager-service**
-- **Manager**
-  - id (PK), name, email, department
+- **Manager:** id (PK), name, email, department
 
 **Đặc điểm thiết kế dữ liệu:**
 - Mỗi service có database riêng biệt (PostgreSQL).
@@ -101,9 +90,7 @@ Doanh nghiệp cần một hệ thống cho phép nhân viên gửi yêu cầu n
 - Các trường trạng thái (status) giúp tracking quy trình xử lý đơn nghỉ phép.
 
 **Sơ đồ tổng quan (ERD rút gọn):**
-```
-> Xem sơ tại docs/assets/ERD-diagram.png
-```
+> Xem sơ đồ ERD tại docs/assets/ERD-diagram.png
 
 ---
 
@@ -115,26 +102,24 @@ Doanh nghiệp cần một hệ thống cho phép nhân viên gửi yêu cầu n
 - **Xác thực:**  
   - Mỗi service xác thực và kiểm tra dữ liệu đầu vào riêng biệt.
   - Không cho phép truy cập trực tiếp vào các service trừ qua Gateway.
-- **Bảo vệ dữ liệu:**  
-  - Không lộ thông tin nhạy cảm qua API.
-  - Kiểm tra dữ liệu đầu vào để tránh injection, lỗi logic.
+
+
 
 ---
 
 ## 6. 📦 Deployment Plan
 
-- Sử dụng `docker-compose` để quản lý toàn bộ hệ thống, đảm bảo các service và database khởi động đồng bộ.
+- Sử dụng docker-compose để quản lý toàn bộ hệ thống, đảm bảo các service và database khởi động đồng bộ.
 - Mỗi microservice có Dockerfile riêng, dễ dàng build và deploy độc lập.
 - PostgreSQL làm database cho từng service.
-
+- Cấu hình môi trường lưu trong file `.env`.
 
 ---
 
 ## 7. 🎨 Architecture Diagram
 
-> Xem sơ đồ kiến trúc tại docs/assets/architecture-diagram.png
-
-*Mỗi service có database riêng biệt (PostgreSQL).*
+> Xem sơ đồ kiến trúc tại docs/assets/architecture-diagram.png  
+> Mỗi service có database riêng biệt (PostgreSQL).
 
 ---
 
@@ -153,5 +138,3 @@ Thiết kế dữ liệu tách biệt giúp giảm rủi ro khi thay đổi, nâ
 - B21DCCN001 - Nguyễn Đức An  
 - B21DCCN373 - Vũ Văn Hiếu  
 - B21DCCN638 - Phùng Ngọc Quý  
-
-
