@@ -125,10 +125,8 @@ Doanh nghiệp cần một hệ thống cho phép nhân viên gửi yêu cầu n
 
 - Sử dụng `docker-compose` để quản lý toàn bộ hệ thống, đảm bảo các service và database khởi động đồng bộ.
 - Mỗi microservice có Dockerfile riêng, dễ dàng build và deploy độc lập.
-- Cấu hình môi trường (database URL, secret key, v.v.) lưu trong file `.env`.
 - PostgreSQL làm database cho từng service.
-- Redis có thể tích hợp thêm cho hàng đợi/thông báo nếu mở rộng.
-- Có thể triển khai trên cloud hoặc server vật lý tùy nhu cầu.
+
 
 ---
 
