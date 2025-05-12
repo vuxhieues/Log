@@ -1,3 +1,17 @@
+# 🧩 Microservices Leave Request System
+
+---
+
+**Nhóm thực hiện:**
+- B21DCCN001 - Nguyễn Đức An  
+- B21DCCN373 - Vũ Văn Hiếu  
+- B21DCCN638 - Phùng Ngọc Quý  
+
+---
+
+## 📁 Project Structure
+
+```
 ├── README.md                       # Project instructions
 ├── .env.example                    # Example environment variables
 ├── docker-compose.yml              # Multi-container setup for all services
@@ -68,3 +82,67 @@
     │   └── readme.md
     └── service-b/
         └── readme.md
+```
+
+---
+
+## 🚀 Getting Started
+
+1. **Clone repository**
+   ```bash
+   git clone <your-repo-url>
+   cd <project-folder>
+   ```
+2. **Copy environment file**
+   ```bash
+   cp .env.example .env
+   ```
+3. **Run with Docker Compose**
+   ```bash
+   docker-compose up --build
+   ```
+4. Truy cập front-end tại: http://localhost:4000
+
+---
+
+## 🧩 Main Components
+
+- **front-end/**: React UI cho nhân viên và quản lý
+- **gateway/**: Nginx reverse proxy, route các API `/api/*` đến các service
+- **services/**: Các microservice Flask:
+  - `employee-service`: Quản lý nhân viên
+  - `manager-service`: Quản lý quản lý
+  - `leave-request-service`: Quản lý phiếu nghỉ phép
+  - `approval-service`: Duyệt/từ chối phiếu nghỉ
+  - `notification-service`: Gửi và lưu thông báo
+- **scripts/**: Khởi tạo database PostgreSQL
+- **docs/**: Tài liệu thiết kế, API, kiến trúc
+
+---
+
+## 🧪 Development Notes
+- Sử dụng OpenAPI YAML trong `docs/api-specs/` để mô tả API.
+- Mỗi service Flask đều có file `readme.md` riêng.
+- Sử dụng Docker Compose để chạy toàn bộ hệ thống.
+
+---
+
+## 👩‍💻 Team Contributions
+- Mỗi thành viên chịu trách nhiệm một hoặc nhiều service, tài liệu rõ ràng trong từng `readme.md` của service.
+
+---
+
+## 📌 Notes
+- Sử dụng branch cho teamwork.
+- Commit thường xuyên.
+- Đảm bảo code chạy được với 1 lệnh: `docker-compose up --build`
+
+---
+
+## 📚 Tài liệu tham khảo
+- Xem thêm chi tiết trong thư mục `docs/` và các file `readme.md` trong từng service.
+
+---
+
+Good luck! 💪🚀
+
