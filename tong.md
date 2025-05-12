@@ -49,6 +49,16 @@ thống cập nhật trạng thái nghỉ phép của nhân viên trong hệ th�
 thông tin.
 
 ---
+
+## 🛠️ Tech Stack
+- **Front-end:** ReactJS, Material UI, React Router, React Toastify
+- **API Gateway:** Nginx (reverse proxy)
+- **Back-end:** Python Flask (cho tất cả các service)
+- **Database:** PostgreSQL 
+- **Containerization:** Docker, Docker Compose
+- **API Documentation:** OpenAPI (Swagger YAML)
+
+---
 ## 📁 Project Structure
 
 ```
