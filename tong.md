@@ -187,19 +187,9 @@ thông tin.
 - [x] Tách manager thành service riêng, chuẩn hóa API, tài liệu.
 - [x] Chuẩn hóa notification-service, phân loại thông báo, bổ sung API lấy thông báo.
 - [x] employee-service kiểm tra manager_id qua manager-service.
-- [x] Cập nhật docker-compose dùng chung database, chuẩn hóa biến môi trường.
 - [x] Viết OpenAPI YAML cho từng service.
 - [x] Viết lại README.md tổng thể và từng service.
 - [x] Đảm bảo chạy toàn bộ hệ thống với 1 lệnh: `docker-compose up`.
-
----
-
-## 📌 Lưu ý vận hành
-- Sử dụng branch Git cho làm việc nhóm.
-- Commit sớm, commit thường xuyên.
-- Đảm bảo các service chỉ giao tiếp qua API Gateway.
-- Sử dụng biến môi trường để cấu hình kết nối database.
-- Tài liệu hóa đầy đủ đặc tả API và hướng dẫn sử dụng.
 
 ---
 
