@@ -49,9 +49,9 @@ thống cập nhật trạng thái nghỉ phép của nhân viên trong hệ th�
 thông tin.
 
 ---
+## 📁 Project Structure
 
-## 📁 Cấu trúc thư mục
-
+```
 ├── README.md                       # Project instructions
 ├── .env.example                    # Example environment variables
 ├── docker-compose.yml              # Multi-container setup for all services
@@ -123,7 +123,6 @@ thông tin.
     └── service-b/
         └── readme.md
 ```
-
 
 ---
 
