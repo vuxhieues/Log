@@ -157,14 +157,10 @@ thông tin.
    docker-compose up --build
    ```
 
-4. **Truy cập API Gateway**
-   - Mặc định tại: `http://localhost:8000`
-   - Các route:
-     - `/api/employees` → employee-service
-     - `/api/managers` → manager-service
-     - `/api/notifications` → notification-service
-     - `/api/leave-requests` → leave-request-service
-     - `/api/approvals` → approval-service
+4. **Truy cập front-end tại:**
+   ```bash
+   http://localhost:4000
+   ```
 
 5. **Tài liệu API**
    - Đặc tả OpenAPI cho từng service tại `docs/api-specs/*.yaml`
