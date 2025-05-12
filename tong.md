@@ -41,11 +41,11 @@ cầu dựa trên thông tin đã xem xét.
 9. Nếu phê duyệt, hệ thống gửi thông báo chấp nhận: Nếu quản lý phê duyệt yêu
 cầu, hệ thống gửi thông báo chấp nhận nghỉ phép cho nhân viên và cập nhật lịch
 nghỉ.
-10.Nếu từ chối, hệ thống gửi thông báo từ chối: Nếu quản lý từ chối yêu cầu, hệ
+10. Nếu từ chối, hệ thống gửi thông báo từ chối: Nếu quản lý từ chối yêu cầu, hệ
 thống gửi thông báo từ chối cho nhân viên kèm lý do.
-11.Cập nhật trạng thái nghỉ phép của nhân viên: Nếu yêu cầu được phê duyệt, hệ
+11. Cập nhật trạng thái nghỉ phép của nhân viên: Nếu yêu cầu được phê duyệt, hệ
 thống cập nhật trạng thái nghỉ phép của nhân viên trong hệ thống quản lý nhân sự.
-12.Kết thúc quy trình: Quy trình kết thúc sau khi hệ thống gửi thông báo và cập nhật
+12. Kết thúc quy trình: Quy trình kết thúc sau khi hệ thống gửi thông báo và cập nhật
 thông tin.
 
 ---
