@@ -52,55 +52,78 @@ thông tin.
 
 ## 📁 Cấu trúc thư mục
 
-```
-microservices-assignment-starter/
-├── README.md                       # Hướng dẫn tổng thể
-├── .env.example                    # Biến môi trường mẫu
-├── docker-compose.yml              # Khởi tạo toàn bộ hệ thống
-├── docs/                           # Tài liệu hệ thống
-│   ├── architecture.md             # Kiến trúc tổng thể
-│   ├── analysis-and-design.md      # Phân tích & thiết kế
-│   ├── asset/                      # Hình ảnh, sơ đồ
-│   └── api-specs/                  # Đặc tả API OpenAPI (YAML)
-│       ├── manager-service.yaml
-│       ├── employee-service.yaml
-│       ├── notification-service.yaml
-│       ├── leave-request-service.yaml
+├── README.md                       # Project instructions
+├── .env.example                    # Example environment variables
+├── docker-compose.yml              # Multi-container setup for all services
+├── docs/                           # Documentation folder
+│   ├── architecture.md             # System architecture
+│   ├── analysis-and-design.md      # System analysis and design
+│   ├── asset/                      # Images, diagrams, etc.
+│   └── api-specs/                  # OpenAPI specs for all services
 │       ├── approval-service.yaml
-├── scripts/                        # Script tiện ích
-│   └── init-db.py                  # Khởi tạo database tự động
-├── services/                       # Các microservice
-│   ├── manager-service/            # Quản lý trưởng phòng
-│   │   ├── Dockerfile
-│   │   ├── requirements.txt
-│   │   ├── readme.md
-│   │   └── src/app.py
-│   ├── employee-service/           # Quản lý nhân viên
-│   │   ├── Dockerfile
-│   │   ├── requirements.txt
-│   │   ├── readme.md
-│   │   └── src/app.py
-│   ├── notification-service/       # Quản lý thông báo
-│   │   ├── Dockerfile
-│   │   ├── requirements.txt
-│   │   ├── readme.md
-│   │   └── src/app.py
-│   ├── leave-request-service/      # Quản lý đơn nghỉ phép
-│   │   ├── Dockerfile
-│   │   ├── requirements.txt
-│   │   ├── readme.md
-│   │   └── src/app.py
-│   ├── approval-service/           # Quản lý phê duyệt
-│   │   ├── Dockerfile
-│   │   ├── requirements.txt
-│   │   ├── readme.md
-│   │   └── src/app.py
+│       ├── employee-service.yaml
+│       ├── leave-request-service.yaml
+│       ├── manager-service.yaml
+│       ├── nofitication-service.yaml
+│       ├── service-a.yaml
+│       └── service-b.yaml
+├── front-end/                      # React front-end
+│   ├── Dockerfile
+│   ├── nginx.conf
+│   ├── package.json
+│   ├── README.md
+│   ├── build/
+│   ├── public/
+│   └── src/
+│       ├── App.js
+│       ├── index.js
+│       ├── components/
+│       ├── config/
+│       ├── context/
+│       ├── hooks/
+│       ├── pages/
+│       └── services/
 ├── gateway/                        # API Gateway (Nginx)
 │   ├── Dockerfile
-│   └── src/nginx.conf
-│
-└── ...
+│   └── src/
+│       └── nginx.conf
+├── scripts/                        # DB init scripts
+│   ├── Dockerfile.db-init
+│   ├── init-db.py
+│   ├── init.sh
+│   └── requirements.txt
+└── services/                       # Microservices
+    ├── approval-service/
+    │   ├── Dockerfile
+    │   ├── readme.md
+    │   ├── requirements.txt
+    │   └── src/app.py
+    ├── employee-service/
+    │   ├── Dockerfile
+    │   ├── readme.md
+    │   ├── requirements.txt
+    │   └── src/app.py
+    ├── leave-request-service/
+    │   ├── Dockerfile
+    │   ├── readme.md
+    │   ├── requirements.txt
+    │   └── src/app.py
+    ├── manager-service/
+    │   ├── Dockerfile
+    │   ├── readme.md
+    │   ├── requirements.txt
+    │   └── src/app.py
+    ├── notification-service/
+    │   ├── Dockerfile
+    │   ├── readme.md
+    │   ├── requirements.txt
+    │   └── src/app.py
+    ├── service-a/
+    │   └── readme.md
+    └── service-b/
+        └── readme.md
 ```
+
 
 ---
 
