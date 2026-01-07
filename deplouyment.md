@@ -6,13 +6,333 @@
 
 ## 📑 **MỤC LỤC**
 
-1. [Tổng quan Build Process](#1-tổng-quan-build-process)
-2. [Java Build Flow (Maven/Gradle)](#2-java-build-flow-mavengradl)
-3. [So sánh với các ngôn ngữ khác](#3-so-sánh-với-các-ngôn-ngữ-khác)
-4. [Dockerfile Generation](#4-dockerfile-generation)
-5. [Jenkins Pipeline Stages](#5-jenkins-pipeline-stages)
-6. [Multi-stage vs Single-stage Build](#6-multi-stage-vs-single-stage-build)
-7. [Q&A](#7-qa-nhanh)
+1. [**LUỒNG DEPLOY - BACKEND FLOW** ⭐](#0-luồng-deploy---backend-flow)
+2. [Tổng quan Build Process](#1-tổng-quan-build-process)
+3. [Java Build Flow (Maven/Gradle)](#2-java-build-flow-mavengradl)
+4. [So sánh với các ngôn ngữ khác](#3-so-sánh-với-các-ngôn-ngữ-khác)
+5. [Dockerfile Generation](#4-dockerfile-generation)
+6. [Jenkins Pipeline Stages](#5-jenkins-pipeline-stages)
+7. [Multi-stage vs Single-stage Build](#6-multi-stage-vs-single-stage-build)
+8. [Q&A](#7-qa-nhanh)
+
+---
+
+## 0️⃣ LUỒNG DEPLOY - BACKEND FLOW ⭐
+
+> **Mô tả đơn giản:** Khi user click "Deploy", backend xử lý như thế nào?
+
+---
+
+### **🎯 TỔNG QUAN 1 CÂU**
+
+```
+User click Deploy 
+  → Backend tạo Dockerfile 
+  → Gửi sang Jenkins 
+  → Jenkins build & chạy container
+```
+
+---
+
+### **📋 LUỒNG CHI TIẾT (10 BƯỚC)**
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│              BACKEND DEPLOYMENT FLOW                          │
+└──────────────────────────────────────────────────────────────┘
+
+STEP 1: User Action (Frontend)
+┌─────────────────┐
+│ User clicks     │
+│ "Deploy" button │
+└────────┬────────┘
+         │ POST /api/v1/applications/deploy
+         ↓
+
+STEP 2: Backend nhận request (Controller)
+┌──────────────────────────────────────────┐
+│ ApplicationController.deployApplication()│
+│   ↓                                      │
+│ 1. Validate request                      │
+│ 2. Extract userId từ JWT                 │
+│ 3. Log: "Deploying application..."       │
+└────────┬─────────────────────────────────┘
+         │
+         ↓
+
+STEP 3: Application Service xử lý (Business Logic)
+┌──────────────────────────────────────────┐
+│ ApplicationService.deployApplication()   │
+│   ↓                                      │
+│ 1. Tìm application trong database        │
+│ 2. Verify user ownership                 │
+│ 3. Check application status              │
+│ 4. Create Build record (status: PENDING) │
+└────────┬─────────────────────────────────┘
+         │
+         ↓
+
+STEP 4: Generate Dockerfile (DockerfileGeneratorService)
+┌──────────────────────────────────────────┐
+│ DockerfileGeneratorService               │
+│   ↓                                      │
+│ 1. Detect language (Java/Python/Node.js)│
+│ 2. Detect build tool (Maven/Gradle)     │
+│ 3. Generate Dockerfile theo template     │
+│    - Java: Multi-stage (Maven + JRE)    │
+│    - Python: Single-stage (pip install) │
+│    - Node.js: Single-stage (npm install)│
+│   ↓                                      │
+│ Output: Dockerfile content (String)      │
+└────────┬─────────────────────────────────┘
+         │
+         ↓
+
+STEP 5: Prepare Deployment Payload
+┌──────────────────────────────────────────┐
+│ JenkinsService.triggerDeployment()       │
+│   ↓                                      │
+│ 1. Get repository info (clone URL)      │
+│ 2. Handle private repo authentication    │
+│    - GitHub App token (1-hour TTL)      │
+│    - Inject: https://x-access-token:    │
+│              TOKEN@github.com/repo.git   │
+│ 3. Build JSON payload:                   │
+│    {                                     │
+│      applicationId: "uuid",              │
+│      request: {                          │
+│        repoCloneUrl: "...",              │
+│        branch: "main",                   │
+│        language: "java",                 │
+│        buildCommand: "mvn package",      │
+│        envVars: [{key, value}],          │
+│        databaseConfig: {...}             │
+│      },                                  │
+│      dockerfile: "FROM maven:..."        │
+│    }                                     │
+└────────┬─────────────────────────────────┘
+         │
+         ↓
+
+STEP 6: Trigger Jenkins Build
+┌──────────────────────────────────────────┐
+│ HTTP Request to Jenkins                  │
+│   ↓                                      │
+│ 1. Get Jenkins CSRF crumb               │
+│    GET /crumbIssuer/api/json             │
+│    → {crumb: "abc123"}                   │
+│                                          │
+│ 2. POST to Jenkins job                   │
+│    POST /job/deploy-application/         │
+│         buildWithParameters              │
+│                                          │
+│    Headers:                              │
+│    - Authorization: Basic base64(        │
+│        username:api_token)               │
+│    - Jenkins-Crumb: abc123               │
+│                                          │
+│    Body (form-data):                     │
+│    - applicationId: uuid                 │
+│    - deploymentData: JSON.stringify()    │
+│    - dockerfile: Dockerfile content      │
+│                                          │
+│ 3. Jenkins returns 201 Created           │
+│    → Build queued                        │
+└────────┬─────────────────────────────────┘
+         │
+         ↓
+
+STEP 7: Update Build Status
+┌──────────────────────────────────────────┐
+│ Back to ApplicationService               │
+│   ↓                                      │
+│ 1. Update Build record:                  │
+│    - status: IN_PROGRESS                 │
+│    - triggeredAt: now()                  │
+│ 2. Save to database                      │
+│ 3. Return BuildDTO to frontend           │
+└────────┬─────────────────────────────────┘
+         │
+         ↓
+
+STEP 8: Jenkins Pipeline Execution (Async)
+┌──────────────────────────────────────────┐
+│ Jenkinsfile Pipeline (8 stages)          │
+│                                          │
+│ Stage 1: Parse deployment data           │
+│   → Extract all params                   │
+│                                          │
+│ Stage 2: Clone repository                │
+│   → git clone with token                 │
+│                                          │
+│ Stage 3: Setup database (if needed)      │
+│   → CREATE DATABASE, USER, GRANT         │
+│                                          │
+│ Stage 4: Build application (Java only)   │
+│   → mvn clean package -DskipTests        │
+│   → target/app.jar ✅                   │
+│                                          │
+│ Stage 5: Write Dockerfile                │
+│   → writeFile(dockerfile content)        │
+│                                          │
+│ Stage 6: Build Docker image              │
+│   → docker build -t app:uuid .           │
+│                                          │
+│ Stage 7: Deploy container                │
+│   → docker stop/rm old container         │
+│   → docker run -d --name app-uuid        │
+│                                          │
+│ Stage 8: Run migrations (if DB exists)   │
+│   → docker exec app flask db upgrade    │
+│                                          │
+│ ⚠️ MỖI STAGE LOG VÀO REDIS STREAMS      │
+│    redis-cli XADD jenkins:logs:stream    │
+└────────┬─────────────────────────────────┘
+         │
+         ↓
+
+STEP 9: Real-time Log Streaming
+┌──────────────────────────────────────────┐
+│ Frontend → Backend SSE → Redis           │
+│                                          │
+│ Frontend:                                │
+│   EventSource('/deploy/stream/uuid')     │
+│                                          │
+│ Backend:                                 │
+│   BuildLogController.streamBuildLogs()   │
+│   - Read từ Redis Stream                 │
+│   - Push qua SSE                         │
+│                                          │
+│ User sees logs real-time:                │
+│   [INFO] Cloning repository...           │
+│   [INFO] Building application...         │
+│   [INFO] Building Docker image...        │
+│   [SUCCESS] Application deployed! 🚀     │
+└────────┬─────────────────────────────────┘
+         │
+         ↓
+
+STEP 10: Deployment Complete
+┌──────────────────────────────────────────┐
+│ Jenkins callback (webhook) hoặc polling  │
+│   ↓                                      │
+│ 1. Update Build record:                  │
+│    - status: SUCCESS / FAILED            │
+│    - completedAt: now()                  │
+│    - duration: endTime - startTime       │
+│ 2. Update Application:                   │
+│    - status: RUNNING / FAILED            │
+│    - containerName: app-uuid             │
+│    - port: 8080                          │
+│ 3. Save to database                      │
+│ 4. Frontend polls /builds/{id}/status    │
+│    → Redirect to app monitoring page     │
+└──────────────────────────────────────────┘
+
+✅ APPLICATION RUNNING!
+   → User có thể access: http://server:8080
+   → Monitoring: Real-time metrics
+   → Logs: View container logs
+```
+
+---
+
+### **🔑 CÁC CLASS/FILE QUAN TRỌNG**
+
+| File | Vai trò | Method chính |
+|------|---------|--------------|
+| **ApplicationController.java** | REST API endpoint | `deployApplication()` |
+| **ApplicationService.java** | Business logic | `deployApplication()`, create Build record |
+| **JenkinsService.java** | Trigger Jenkins | `triggerDeployment()`, build payload |
+| **DockerfileGeneratorService.java** | Generate Dockerfile | `generateDockerfile()`, detect language |
+| **GithubAppService.java** | GitHub authentication | `getInstallationAccessToken()` |
+| **BuildLogController.java** | Stream logs | `streamBuildLogs()` via SSE |
+| **Jenkinsfile** | Pipeline orchestration | 8 stages (clone, build, deploy) |
+
+---
+
+### **💡 ĐIỂM QUAN TRỌNG**
+
+**1. Backend KHÔNG build/deploy trực tiếp**
+```
+Backend chỉ:
+  ✅ Generate Dockerfile
+  ✅ Prepare deployment config
+  ✅ Trigger Jenkins API
+  ❌ KHÔNG chạy docker build
+  ❌ KHÔNG chạy git clone
+```
+
+**2. Jenkins là "worker"**
+```
+Jenkins thực hiện:
+  ✅ Clone repository
+  ✅ Build application (mvn/gradle/npm)
+  ✅ Build Docker image
+  ✅ Run container
+  ✅ Setup database
+  ✅ Run migrations
+```
+
+**3. Communication flow**
+```
+Backend → Jenkins: HTTP POST (trigger)
+Jenkins → Redis: XADD (logs)
+Backend → Frontend: SSE (stream logs)
+```
+
+**4. Async processing**
+```
+User không chờ deploy xong mới nhận response!
+
+Flow:
+  User click Deploy
+    ↓
+  Backend returns ngay: {buildId, status: "PENDING"}
+    ↓
+  Frontend polls hoặc SSE để theo dõi progress
+    ↓
+  Jenkins chạy background (2-5 phút)
+    ↓
+  Build complete → Update status → Frontend redirect
+```
+
+---
+
+### **⏱️ TIMELINE ESTIMATE**
+
+| Stage | Time | Note |
+|-------|------|------|
+| Backend processing | ~1-2s | Generate Dockerfile, trigger Jenkins |
+| Jenkins queue | ~5-10s | Wait for available executor |
+| Clone repository | ~10-30s | Depends on repo size |
+| Build application (Java) | ~2-5min | Maven download deps + compile |
+| Build application (Python) | ~30-60s | pip install |
+| Build Docker image | ~1-3min | Depends on layers |
+| Deploy container | ~5-10s | docker run |
+| Run migrations | ~10-30s | Database queries |
+| **TOTAL** | **3-8 min** | Java app, first deploy |
+
+**Subsequent deploys faster:**
+- Maven cache: 2-5 min → 30-60s
+- Docker layer cache: 3 min → 30s
+- No database creation: -30s
+
+---
+
+### **🎓 TÓM TẮT CHO BẢO VỆ**
+
+**Q: Backend làm gì khi user deploy?**
+
+**A (30 giây):**
+> "Backend nhận request từ frontend, **generate Dockerfile** tự động dựa trên ngôn ngữ (Java/Python/Node.js), sau đó **trigger Jenkins** qua HTTP API. Backend **không build trực tiếp** mà ủy thác cho Jenkins. Jenkins sẽ clone repo, build application (Maven cho Java), build Docker image, và chạy container. Logs được stream real-time qua Redis Streams sang frontend. Backend chỉ đóng vai trò **orchestrator**, còn Jenkins là **worker** thực sự."
+
+**Key Points:**
+1. ✅ Backend = Orchestrator (trigger, không build)
+2. ✅ Jenkins = Worker (clone, build, deploy)
+3. ✅ Dockerfile tự động generated theo language
+4. ✅ Logs real-time qua Redis → SSE
+5. ✅ Async processing (không block user)
 
 ---
 
