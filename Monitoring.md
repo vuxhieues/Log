@@ -784,6 +784,14 @@ taskRef.set(scheduledTask);  // Thread-safe set
 ScheduledFuture<?> task = taskRef.get();  // Thread-safe get
 ```
 
+1. Tính Nguyên tử (Atomicity)
+Trong lập trình thông thường, một thao tác tưởng chừng như đơn giản (ví dụ: kiểm tra rồi mới gán giá trị) thực tế lại gồm nhiều bước nhỏ. Trong môi trường đa luồng, một luồng khác có thể "nhảy vào" giữa các bước này và thay đổi dữ liệu, gây ra lỗi Race Condition.
+AtomicReference đảm bảo toàn bộ cụm thao tác đó diễn ra như một bước duy nhất không thể bị chia cắt. Hoặc là tất cả đều thành công, hoặc là không có gì thay đổi cả.
+2. Cơ chế "Thử và Sai" thay vì "Chặn"
+Sự khác biệt lớn nhất giữa AtomicReference và synchronized (hoặc Lock) là:
+Synchronized (Pessimistic - Bi quan): "Tôi sắp sửa dùng biến này, tất cả các luồng khác phải dừng lại và đợi cho đến khi tôi xong." -> Gây tốn tài nguyên do luồng phải chờ đợi.
+AtomicReference (Optimistic - Lạc quan): "Tôi cứ nghĩ là biến này vẫn đang là A, tôi sẽ thử đổi nó thành B. Nếu lúc tôi nhấn nút 'đổi', nó vẫn là A thì tôi thành công. Nếu ai đó đã nhanh tay đổi nó thành C rồi, tôi sẽ thất bại và thử lại từ đầu."
+
 **AtomicInteger / AtomicLong:**
 ```java
 // Thread-safe counters
